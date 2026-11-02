@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html id="document" lang="ko">
+  <head id="document-head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f4ef">
+    <meta name="description" content="2컷 또는 4컷을 촬영해 나만의 인생네컷을 만들어 보세요.">
+    <title>인생네컷 | 오늘의 순간을 담아요</title>
+    <link id="stylesheet-link" rel="stylesheet" href="style.css">
+  </head>
+  <body id="page">
+    <main id="camera-app" class="app-shell">
+      <header id="page-header" class="page-header">
+        <p id="brand-label" class="brand-label">LIFE CUT</p>
+        <h1 id="page-title">오늘의 인생네컷</h1>
+        <p id="page-intro" class="page-intro">원하는 컷 수를 고르고, 지금 이 순간을 담아 보세요.</p>
+      </header>
+
+      <section id="cut-select-section" class="screen cut-select-section" aria-labelledby="cut-select-heading">
+        <div id="cut-select-section-heading" class="section-heading">
+          <p id="step-one-label" class="step-label">STEP 01</p>
+          <h2 id="cut-select-heading">몇 컷으로 찍을까요?</h2>
+          <p id="cut-select-hint" class="section-hint">원하는 사진 수를 선택해 주세요.</p>
+        </div>
+
+        <div id="cut-count-options" class="cut-count-options" role="group" aria-label="촬영할 컷 수 선택">
+          <button id="cut-count-2" class="cut-option is-selected" type="button" aria-pressed="true">
+            <span id="cut-count-2-frame" class="cut-option-frame cut-option-frame-2" aria-hidden="true">
+              <span id="cut-count-2-photo-1" class="cut-option-photo"></span>
+              <span id="cut-count-2-photo-2" class="cut-option-photo"></span>
+            </span>
+            <span id="cut-count-2-label" class="cut-option-label">2컷</span>
+            <span id="cut-count-2-description" class="cut-option-description">가볍게 두 장</span>
+          </button>
+
+          <button id="cut-count-4" class="cut-option" type="button" aria-pressed="false">
+            <span id="cut-count-4-frame" class="cut-option-frame cut-option-frame-4" aria-hidden="true">
+              <span id="cut-count-4-photo-1" class="cut-option-photo"></span>
+              <span id="cut-count-4-photo-2" class="cut-option-photo"></span>
+              <span id="cut-count-4-photo-3" class="cut-option-photo"></span>
+              <span id="cut-count-4-photo-4" class="cut-option-photo"></span>
+            </span>
+            <span id="cut-count-4-label" class="cut-option-label">4컷</span>
+            <span id="cut-count-4-description" class="cut-option-description">네 장으로 다채롭게</span>
+          </button>
+        </div>
+
+        <div id="start-controls" class="start-controls">
+          <p id="start-hint" class="start-hint">준비가 되면 한 번 눌러 촬영을 시작해요.</p>
+          <button id="start-button" class="primary-button" type="button">
+            <span id="start-button-icon" class="shutter-icon" aria-hidden="true"></span>
+            <span id="start-button-label">촬영 시작</span>
+          </button>
+        </div>
+      </section>
+
+      <section id="camera-section" class="screen camera-section hidden" aria-labelledby="camera-heading">
+        <div id="camera-section-heading" class="section-heading">
+          <p id="step-two-label" class="step-label">STEP 02</p>
+          <h2 id="camera-heading">촬영 중이에요</h2>
+          <p id="camera-hint" class="section-hint">카메라를 준비하고 있어요.</p>
+        </div>
+
+        <div id="capture-progress-card" class="capture-progress-card" role="status" aria-live="polite">
+          <span id="capture-progress-label" class="capture-progress-label">현재 촬영</span>
+          <strong id="capture-progress" class="capture-progress">1 / 2</strong>
+        </div>
+
+        <div id="camera-stage" class="camera-stage">
+          <video
+            id="camera-preview"
+            class="camera-preview"
+            autoplay
+            muted
+            playsinline
+            aria-label="실시간 카메라 미리 보기"
+          ></video>
+          <div id="camera-frame" class="camera-frame" aria-hidden="true"></div>
+          <div id="countdown" class="countdown hidden" aria-live="assertive" aria-atomic="true"></div>
+          <p id="preview-label" class="preview-label">LIVE PREVIEW</p>
+        </div>
+
+        <div id="capture-controls" class="capture-controls">
+          <p id="capture-hint" class="capture-hint" role="status" aria-live="polite">카운트다운이 끝나면 자동으로 촬영돼요.</p>
+        </div>
+
+        <div id="thumbnail-section" class="thumbnail-section">
+          <div id="thumbnail-heading" class="thumbnail-heading">
+            <h3 id="thumbnail-title">촬영한 사진</h3>
+            <p id="thumbnail-hint">찍은 사진이 여기에 차례로 보여요.</p>
+          </div>
+          <div id="captured-thumbnails" class="captured-thumbnails" aria-label="촬영된 컷 미리보기" aria-live="polite">
+            <p id="thumbnail-empty" class="thumbnail-empty">아직 촬영한 사진이 없어요.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="result-section" class="screen result-section hidden" aria-labelledby="result-heading">
+        <div id="result-section-heading" class="section-heading">
+          <p id="step-three-label" class="step-label">STEP 03</p>
+          <h2 id="result-heading">오늘의 인생네컷</h2>
+          <p id="result-hint" class="section-hint">촬영한 순간을 한 장의 세로 프레임으로 모았어요.</p>
+        </div>
+
+        <div id="result-card" class="result-card">
+          <p id="filter-instruction" class="filter-instruction">필터를 골라 보세요</p>
+          <div id="filters"></div>
+          <div id="result-strip" class="result-strip">
+            <canvas
+              id="result-canvas"
+              class="result-canvas"
+              role="img"
+              aria-label="촬영한 사진을 세로로 배치한 결과 프레임"
+            >촬영 결과를 표시하는 세로 프레임입니다.</canvas>
+          </div>
+        </div>
+
+        <button id="reset-button" class="secondary-button" type="button">처음으로</button>
+      </section>
+
+      <section id="error-message" class="error-message hidden" role="alert" aria-live="polite">
+        <span id="error-icon" class="error-icon" aria-hidden="true">!</span>
+        <div id="error-copy" class="error-copy">
+          <p id="error-title" class="error-title">카메라를 사용할 수 없어요</p>
+          <p id="error-description">브라우저의 카메라 권한을 허용했는지 확인해 주세요. 카메라는 보안 연결(HTTPS) 또는 내 기기에서 열었을 때 사용할 수 있어요.</p>
+        </div>
+      </section>
+
+      <footer id="page-footer" class="page-footer">
+        <p id="privacy-note">촬영한 사진은 이 기기에서만 확인할 수 있어요.</p>
+      </footer>
+    </main>
+    <script id="camera-script" src="js/camera.js"></script>
+    <script id="frame-script" src="js/frame.js"></script>
+    <script id="filters-script" src="js/filters.js"></script>
+    <script id="app-script" src="js/app.js"></script>
+  </body>
+</html>
