@@ -115,6 +115,15 @@
           </div>
         </div>
 
+        <button id="qr-btn" class="primary-button qr-button" type="button">QR코드로 휴대폰에 받기</button>
+        <p id="qr-message" class="qr-message" role="status" aria-live="polite">버튼을 눌러 QR코드를 만들어요.</p>
+        <div id="qr-box" class="qr-box hidden">
+          <p id="qr-scan-instruction">휴대폰 카메라로 QR코드를 비춰 보세요</p>
+          <div id="qrcode" class="qrcode" aria-label="사진을 여는 QR 코드"></div>
+          <p id="qr-save-instruction">열린 사진을 길게 눌러 저장하세요</p>
+          <a id="photo-link" class="photo-link" href="#" target="_blank" rel="noopener noreferrer">사진을 새 창으로 열기</a>
+        </div>
+
         <button id="reset-button" class="secondary-button" type="button">처음으로</button>
       </section>
 
@@ -127,12 +136,16 @@
       </section>
 
       <footer id="page-footer" class="page-footer">
-        <p id="privacy-note">촬영한 사진은 이 기기에서만 확인할 수 있어요.</p>
+        <p id="privacy-note">올린 사진은 공개 주소로 열리며, 직접 삭제하기 전까지 보관돼요.</p>
       </footer>
     </main>
+    <script id="supabase-script" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script id="qrcode-script" src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script id="config-script" src="js/config.js"></script>
     <script id="camera-script" src="js/camera.js"></script>
     <script id="frame-script" src="js/frame.js"></script>
     <script id="filters-script" src="js/filters.js"></script>
+    <script id="upload-script" src="js/upload.js"></script>
     <script id="app-script" src="js/app.js"></script>
   </body>
 </html>

@@ -488,6 +488,57 @@ button {
   background: #fff;
 }
 
+.qr-button {
+  margin-top: 16px;
+}
+
+.qr-message {
+  min-height: 1.5em;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.qr-box {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 18px 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fffefa;
+}
+
+.qr-box p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.qrcode {
+  display: grid;
+  width: 200px;
+  min-height: 200px;
+  place-items: center;
+  background: #fff;
+}
+
+.qrcode img,
+.qrcode canvas {
+  display: block;
+  max-width: 100%;
+}
+
+.photo-link {
+  color: #b83f2b;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 .secondary-button {
   display: inline-flex;
   min-width: 160px;

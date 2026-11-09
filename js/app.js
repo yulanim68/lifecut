@@ -1,11 +1,13 @@
 let selectedCutCount = null;
 const state = {
   shots: [],
-  filter: "original"
+  filter: "original",
+  strip: null
 };
 let cameraStream = null;
 let cameraPreparationPromise = null;
 let isSessionRunning = false;
+let qrUploadVersion = 0;
 
 const appElements = {
   cutSelectSection: document.getElementById("cut-select-section"),
@@ -23,6 +25,11 @@ const appElements = {
   resultSection: document.getElementById("result-section"),
   resultCanvas: document.getElementById("result-canvas"),
   filters: document.getElementById("filters"),
+  qrButton: document.getElementById("qr-btn"),
+  qrMessage: document.getElementById("qr-message"),
+  qrBox: document.getElementById("qr-box"),
+  qrCode: document.getElementById("qrcode"),
+  photoLink: document.getElementById("photo-link"),
   resetButton: document.getElementById("reset-button"),
   errorMessage: document.getElementById("error-message"),
   errorTitle: document.getElementById("error-title"),
@@ -339,6 +346,13 @@ function showPreview(strip) {
 
 // 원본 촬영 사진에 선택된 필터를 새로 적용해 프레임 결과를 다시 만듭니다.
 function renderResult() {
+  qrUploadVersion += 1;
+  appElements.qrBox.classList.add("hidden");
+  appElements.qrButton.disabled = false;
+  appElements.qrMessage.textContent = "버튼을 눌러 QR코드를 만들어요.";
+  appElements.qrCode.replaceChildren();
+  appElements.photoLink.removeAttribute("href");
+
   try {
     const filteredShots = state.shots.map(
       // 매번 원본 촬영 캔버스에서 별도의 필터 결과를 만듭니다.
@@ -347,9 +361,11 @@ function renderResult() {
       }
     );
     const strip = makeStrip(filteredShots);
+    state.strip = strip;
     updateFilterButtons();
     showPreview(strip);
   } catch (cause) {
+    state.strip = null;
     const context = appElements.resultCanvas.getContext("2d");
     if (context) {
       context.clearRect(0, 0, appElements.resultCanvas.width, appElements.resultCanvas.height);
@@ -361,6 +377,34 @@ function renderResult() {
   }
 }
 
+// 완성 프레임을 업로드하고 사진 주소를 QR 코드와 링크로 보여 줍니다.
+async function onQrButtonClick() {
+  const requestVersion = ++qrUploadVersion;
+  appElements.qrButton.disabled = true;
+  appElements.qrMessage.textContent = "사진을 올리는 중이에요...";
+  appElements.qrBox.classList.add("hidden");
+
+  try {
+    const url = await uploadPhoto(state.strip);
+    if (requestVersion !== qrUploadVersion) {
+      return;
+    }
+    drawQrCode(appElements.qrCode, url);
+    appElements.photoLink.href = url;
+    appElements.qrBox.classList.remove("hidden");
+    appElements.qrMessage.textContent = "사진을 올렸어요. QR코드를 휴대폰으로 비춰 보세요.";
+  } catch (error) {
+    if (requestVersion === qrUploadVersion) {
+      const detail = error && error.message ? error.message : String(error);
+      appElements.qrMessage.textContent = "올리지 못했어요: " + detail;
+    }
+  } finally {
+    if (requestVersion === qrUploadVersion) {
+      appElements.qrButton.disabled = false;
+    }
+  }
+}
+
 // 선택, 촬영 사진, 썸네일과 결과를 비우고 카메라를 다시 준비합니다.
 async function resetSession() {
   if (isSessionRunning) {
@@ -368,9 +412,11 @@ async function resetSession() {
   }
 
   stopCamera();
+  qrUploadVersion += 1;
   selectedCutCount = null;
   state.shots = [];
   state.filter = "original";
+  state.strip = null;
   updateFilterButtons();
   appElements.cutCount2.classList.remove("is-selected");
   appElements.cutCount2.setAttribute("aria-pressed", "false");
@@ -389,6 +435,11 @@ async function resetSession() {
   }
   appElements.resultCanvas.width = 0;
   appElements.resultCanvas.height = 0;
+  appElements.qrBox.classList.add("hidden");
+  appElements.qrButton.disabled = false;
+  appElements.qrMessage.textContent = "버튼을 눌러 QR코드를 만들어요.";
+  appElements.qrCode.replaceChildren();
+  appElements.photoLink.removeAttribute("href");
   appElements.resultSection.classList.add("hidden");
   appElements.cameraSection.classList.add("hidden");
   appElements.cutSelectSection.classList.remove("hidden");
@@ -421,6 +472,11 @@ async function initApp() {
     "resultSection",
     "resultCanvas",
     "filters",
+    "qrButton",
+    "qrMessage",
+    "qrBox",
+    "qrCode",
+    "photoLink",
     "resetButton",
     "errorMessage",
     "errorTitle",
@@ -440,11 +496,13 @@ async function initApp() {
   appElements.cutCount2.addEventListener("click", onSelectTwoCuts);
   appElements.cutCount4.addEventListener("click", onSelectFourCuts);
   appElements.startButton.addEventListener("click", onStartButtonClick);
+  appElements.qrButton.addEventListener("click", onQrButtonClick);
   appElements.resetButton.addEventListener("click", onResetButtonClick);
   createFilterButtons();
   selectedCutCount = null;
   state.shots = [];
   state.filter = "original";
+  state.strip = null;
   appElements.cutCount2.classList.remove("is-selected");
   appElements.cutCount2.setAttribute("aria-pressed", "false");
   appElements.cutCount4.classList.remove("is-selected");
