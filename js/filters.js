@@ -60,11 +60,27 @@ const FILTERS = [
     apply: function (r, g, b) {
       return [clamp(r + 30), clamp(g + 30), clamp(b + 30)];
     }
+  },
+  {
+    name: "dreamy",
+    label: "포샤시하게",
+    // 몽환 효과의 밝기와 대비는 applyFilter에서 강도에 맞춰 처리합니다.
+    apply: function (r, g, b) {
+      return [clamp(r), clamp(g), clamp(b)];
+    }
+  },
+  {
+    name: "noise",
+    label: "노이즈",
+    // 필름 노이즈는 applyFilter에서 강도에 맞춰 처리합니다.
+    apply: function (r, g, b) {
+      return [clamp(r), clamp(g), clamp(b)];
+    }
   }
 ];
 
-// 원본 캔버스를 바꾸지 않고 같은 크기의 새 캔버스에 필터 결과를 그립니다.
-function applyFilter(canvas, filterName) {
+// 원본 촬영 사진을 바꾸지 않고 고른 필터와 강도를 새 캔버스에 적용합니다.
+function applyFilter(canvas, filterName, intensity) {
   const filter = FILTERS.find(
     // 지정된 이름과 일치하는 필터 정의를 찾습니다.
     function (item) {
@@ -73,6 +89,10 @@ function applyFilter(canvas, filterName) {
   );
   if (!filter) {
     throw new Error("선택한 필터를 찾지 못했어요.");
+  }
+  const effectIntensity = intensity === undefined ? 50 : Number(intensity);
+  if (!Number.isFinite(effectIntensity) || effectIntensity < 0 || effectIntensity > 100) {
+    throw new Error("필터 강도는 0부터 100 사이로 선택해 주세요.");
   }
   if (
     typeof HTMLCanvasElement === "undefined" ||
@@ -105,19 +125,64 @@ function applyFilter(canvas, filterName) {
 
   try {
     for (let index = 0; index < imageData.data.length; index += 4) {
-      const [red, green, blue] = filter.apply(
+      let [red, green, blue] = filter.apply(
         imageData.data[index],
         imageData.data[index + 1],
         imageData.data[index + 2]
       );
+      if (filterName === "noise" && effectIntensity > 0) {
+        const noise = getNoiseValue(index / 4, effectIntensity);
+        red = clamp(red + noise);
+        green = clamp(green + noise);
+        blue = clamp(blue + noise);
+      }
       imageData.data[index] = red;
       imageData.data[index + 1] = green;
       imageData.data[index + 2] = blue;
     }
-    filteredContext.putImageData(imageData, 0, 0);
+    if (filterName === "dreamy" && effectIntensity > 0) {
+      applyDreamyEffect(imageData, canvas, filteredContext, effectIntensity);
+    } else {
+      filteredContext.putImageData(imageData, 0, 0);
+    }
   } catch (cause) {
     throw new Error("필터를 사진에 적용하지 못했어요. 다른 필터를 선택하거나 다시 촬영해 주세요.");
   }
 
   return filteredCanvas;
+}
+
+// 사진마다 같은 무늬가 유지되는 결정형 필름 노이즈 값을 계산합니다.
+function getNoiseValue(pixelIndex, intensity) {
+  const value = Math.sin((pixelIndex + 1) * 12.9898 + 78.233) * 43758.5453;
+  const randomPart = value - Math.floor(value);
+  return (randomPart * 2 - 1) * 28 * intensity / 100;
+}
+
+// 흐린 빛을 섞은 뒤 밝고 어두운 차이를 키워 포샤시 효과를 적용합니다.
+function applyDreamyEffect(imageData, sourceCanvas, targetContext, intensity) {
+  const blurredCanvas = document.createElement("canvas");
+  blurredCanvas.width = sourceCanvas.width;
+  blurredCanvas.height = sourceCanvas.height;
+  const blurredContext = blurredCanvas.getContext("2d", { willReadFrequently: true });
+  if (!blurredContext) {
+    throw new Error("흐림 효과 화면을 준비하지 못했어요.");
+  }
+  blurredContext.filter = "blur(" + (intensity / 100 * 8) + "px)";
+  blurredContext.drawImage(sourceCanvas, 0, 0);
+  blurredContext.filter = "none";
+  const blurredData = blurredContext.getImageData(0, 0, blurredCanvas.width, blurredCanvas.height);
+  const glowMix = intensity / 100 * 0.45;
+  const contrast = 1 + intensity / 100 * 1.15;
+  const brightness = intensity / 100 * 12;
+
+  for (let index = 0; index < imageData.data.length; index += 4) {
+    for (let channel = 0; channel < 3; channel += 1) {
+      const source = imageData.data[index + channel];
+      const glow = blurredData.data[index + channel];
+      const softened = source * (1 - glowMix) + glow * glowMix;
+      imageData.data[index + channel] = clamp((softened - 128) * contrast + 128 + brightness);
+    }
+  }
+  targetContext.putImageData(imageData, 0, 0);
 }

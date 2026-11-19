@@ -10,10 +10,16 @@ function formatDeviceDate(date) {
   return year + "-" + month + "-" + day;
 }
 
-// 촬영 순서대로 캔버스를 중앙 cover 방식으로 배치한 흰 세로 프레임을 만듭니다.
-function makeStrip(shots) {
+// 촬영 사진과 선택 글씨 색을 반영한 흰 세로 프레임을 만듭니다.
+function makeStrip(shots, options) {
   if (!Array.isArray(shots) || (shots.length !== 2 && shots.length !== 4)) {
     throw new Error("사진은 촬영 순서대로 2장 또는 4장을 준비해 주세요.");
+  }
+  const textOptions = options || {};
+  const titleColor = textOptions.titleColor || "#24231f";
+  const dateColor = textOptions.dateColor || "#77746e";
+  if (!/^#[0-9a-f]{6}$/i.test(titleColor) || !/^#[0-9a-f]{6}$/i.test(dateColor)) {
+    throw new Error("프레임 글씨 색이 올바르지 않아요.");
   }
 
   for (const shot of shots) {
@@ -89,12 +95,12 @@ function makeStrip(shots) {
   );
 
   const footerTop = topPadding + shots.length * photoHeight + (shots.length - 1) * gap;
-  context.fillStyle = "#24231f";
+  context.fillStyle = titleColor;
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.font = "700 " + 30 * scale + "px sans-serif";
   context.fillText("인생네컷", stripWidth / 2, footerTop + 40 * scale);
-  context.fillStyle = "#77746e";
+  context.fillStyle = dateColor;
   context.font = "400 " + 18 * scale + "px sans-serif";
   context.fillText(formatDeviceDate(new Date()), stripWidth / 2, footerTop + 76 * scale);
   return strip;

@@ -8,6 +8,7 @@ let cameraStream = null;
 let cameraPreparationPromise = null;
 let isSessionRunning = false;
 let qrUploadVersion = 0;
+let decorationEditor = null;
 
 const appElements = {
   cutSelectSection: document.getElementById("cut-select-section"),
@@ -25,6 +26,8 @@ const appElements = {
   resultSection: document.getElementById("result-section"),
   resultCanvas: document.getElementById("result-canvas"),
   filters: document.getElementById("filters"),
+  dreamyFilterControl: document.getElementById("dream-intensity-control"),
+  noiseFilterControl: document.getElementById("noise-intensity-control"),
   qrButton: document.getElementById("qr-btn"),
   qrMessage: document.getElementById("qr-message"),
   qrBox: document.getElementById("qr-box"),
@@ -75,6 +78,12 @@ function updateFilterButtons() {
   );
 }
 
+// 선택한 포샤시 또는 노이즈 필터에 맞는 강도 조절 막대만 보여 줍니다.
+function updateFilterIntensityControls() {
+  appElements.dreamyFilterControl.classList.toggle("hidden", state.filter !== "dreamy");
+  appElements.noiseFilterControl.classList.toggle("hidden", state.filter !== "noise");
+}
+
 // FILTERS 목록을 순회해 결과 화면의 필터 선택 버튼을 만듭니다.
 function createFilterButtons() {
   appElements.filters.replaceChildren();
@@ -93,6 +102,7 @@ function createFilterButtons() {
       button.addEventListener("click", function () {
         state.filter = filter.name;
         updateFilterButtons();
+        updateFilterIntensityControls();
         try {
           renderResult();
         } catch (error) {
@@ -354,14 +364,17 @@ function renderResult() {
   appElements.photoLink.removeAttribute("href");
 
   try {
+    const filterIntensity = decorationEditor.getFilterIntensity(state.filter);
+    const frameOptions = decorationEditor.getFrameOptions();
     const filteredShots = state.shots.map(
       // 매번 원본 촬영 캔버스에서 별도의 필터 결과를 만듭니다.
       function (shot) {
-        return applyFilter(shot, state.filter);
+        return applyFilter(shot, state.filter, filterIntensity);
       }
     );
-    const strip = makeStrip(filteredShots);
-    state.strip = strip;
+    const strip = makeStrip(filteredShots, frameOptions);
+    decorationEditor.setBaseCanvas(strip);
+    state.strip = decorationEditor.compose();
     updateFilterButtons();
     showPreview(strip);
   } catch (cause) {
@@ -374,6 +387,41 @@ function renderResult() {
     appElements.resultCanvas.height = 0;
     const detail = cause && cause.message ? " " + cause.message : "";
     throw new Error("필터 적용 또는 결과 만들기에 실패했어요." + detail);
+  }
+}
+
+// 필터 강도나 프레임 글씨 색이 바뀌면 새 결과를 만들고 필요하면 필터를 초기화합니다.
+function onEditorBaseChange(options) {
+  if (options && options.resetFilter) {
+    state.filter = "original";
+    updateFilterButtons();
+    updateFilterIntensityControls();
+  }
+  if (state.shots.length === 0) {
+    return;
+  }
+  try {
+    renderResult();
+  } catch (error) {
+    showError(error);
+  }
+}
+
+// 꾸미기 내용이 바뀌면 업로드 사진을 다시 합치고 이전 QR을 숨깁니다.
+function onDecorationChange() {
+  if (!decorationEditor || !state.strip) {
+    return;
+  }
+  try {
+    state.strip = decorationEditor.compose();
+    qrUploadVersion += 1;
+    appElements.qrBox.classList.add("hidden");
+    appElements.qrButton.disabled = false;
+    appElements.qrMessage.textContent = "버튼을 눌러 QR코드를 만들어요.";
+    appElements.qrCode.replaceChildren();
+    appElements.photoLink.removeAttribute("href");
+  } catch (error) {
+    showError(error);
   }
 }
 
@@ -417,6 +465,10 @@ async function resetSession() {
   state.shots = [];
   state.filter = "original";
   state.strip = null;
+  updateFilterIntensityControls();
+  if (decorationEditor) {
+    decorationEditor.reset();
+  }
   updateFilterButtons();
   appElements.cutCount2.classList.remove("is-selected");
   appElements.cutCount2.setAttribute("aria-pressed", "false");
@@ -472,6 +524,8 @@ async function initApp() {
     "resultSection",
     "resultCanvas",
     "filters",
+    "dreamyFilterControl",
+    "noiseFilterControl",
     "qrButton",
     "qrMessage",
     "qrBox",
@@ -493,6 +547,15 @@ async function initApp() {
     return;
   }
 
+  try {
+    decorationEditor = initDecorationEditor({
+      onChange: onDecorationChange,
+      onBaseChange: onEditorBaseChange
+    });
+  } catch (error) {
+    showError(error);
+    return;
+  }
   appElements.cutCount2.addEventListener("click", onSelectTwoCuts);
   appElements.cutCount4.addEventListener("click", onSelectFourCuts);
   appElements.startButton.addEventListener("click", onStartButtonClick);
@@ -503,6 +566,7 @@ async function initApp() {
   state.shots = [];
   state.filter = "original";
   state.strip = null;
+  updateFilterIntensityControls();
   appElements.cutCount2.classList.remove("is-selected");
   appElements.cutCount2.setAttribute("aria-pressed", "false");
   appElements.cutCount4.classList.remove("is-selected");
