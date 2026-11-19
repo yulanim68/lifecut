@@ -98,20 +98,110 @@
       <section id="result-section" class="screen result-section hidden" aria-labelledby="result-heading">
         <div id="result-section-heading" class="section-heading">
           <p id="step-three-label" class="step-label">STEP 03</p>
-          <h2 id="result-heading">오늘의 인생네컷</h2>
-          <p id="result-hint" class="section-hint">촬영한 순간을 한 장의 세로 프레임으로 모았어요.</p>
+          <h2 id="result-heading">당신은 어떤 인생을 살아왔나요?</h2>
+          <p id="result-hint" class="section-hint">소중한 장면을 만들어 보세요.</p>
         </div>
 
         <div id="result-card" class="result-card">
+          <div id="editor-tabs" class="editor-tabs" role="tablist" aria-label="사진 편집 기능">
+            <button id="tab-frame" class="editor-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-frame" data-panel="panel-frame">프레임</button>
+            <button id="tab-filter" class="editor-tab active" type="button" role="tab" aria-selected="true" aria-controls="panel-filter" data-panel="panel-filter">필터</button>
+            <button id="tab-sticker" class="editor-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-sticker" data-panel="panel-sticker">스티커</button>
+            <button id="tab-drawing" class="editor-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-drawing" data-panel="panel-drawing">그리기</button>
+          </div>
           <p id="filter-instruction" class="filter-instruction">필터를 골라 보세요</p>
-          <div id="filters"></div>
-          <div id="result-strip" class="result-strip">
-            <canvas
-              id="result-canvas"
-              class="result-canvas"
-              role="img"
-              aria-label="촬영한 사진을 세로로 배치한 결과 프레임"
-            >촬영 결과를 표시하는 세로 프레임입니다.</canvas>
+          <div id="panel-filter" class="editor-panel" role="tabpanel" aria-labelledby="tab-filter">
+            <div id="filters"></div>
+            <div class="filter-intensity-controls">
+              <label id="dream-intensity-control" class="filter-intensity-control hidden" for="dream-intensity">
+                <span>몽환 흐림·명암</span>
+                <span class="filter-intensity-scale"><span>약하게</span><span id="dream-intensity-value">50%</span><span>강하게</span></span>
+                <input id="dream-intensity" class="filter-intensity-slider" type="range" min="0" max="100" value="50" step="1">
+              </label>
+              <label id="noise-intensity-control" class="filter-intensity-control hidden" for="noise-intensity">
+                <span>노이즈</span>
+                <span class="filter-intensity-scale"><span>약하게</span><span id="noise-intensity-value">50%</span><span>강하게</span></span>
+                <input id="noise-intensity" class="filter-intensity-slider" type="range" min="0" max="100" value="50" step="1">
+              </label>
+            </div>
+          </div>
+          <div id="panel-frame" class="editor-panel hidden" role="tabpanel" aria-labelledby="tab-frame">
+            <p class="editor-help">프레임을 누르면 사진 위에 추가돼요. 스티커처럼 끌어 옮기고 왼쪽 버튼으로 크기를 조절해 보세요.</p>
+            <div id="frame-options" class="frame-options" aria-label="프레임 그림 목록"></div>
+            <div class="frame-color-targets" role="group" aria-label="색을 바꿀 프레임 요소">
+              <button id="frame-title-target" class="tool-choice active" type="button" aria-pressed="true">인생네컷 글씨</button>
+              <button id="frame-date-target" class="tool-choice" type="button" aria-pressed="false">날짜</button>
+            </div>
+            <div id="frame-color-palette" class="frame-color-palette" role="group" aria-label="프레임 색상 팔레트">
+              <button class="frame-color-swatch" type="button" data-color="#ff0000" aria-label="빨강" title="빨강"></button>
+              <button class="frame-color-swatch" type="button" data-color="#ff8c00" aria-label="주황" title="주황"></button>
+              <button class="frame-color-swatch" type="button" data-color="#ffd700" aria-label="노랑" title="노랑"></button>
+              <button class="frame-color-swatch" type="button" data-color="#008000" aria-label="초록" title="초록"></button>
+              <button class="frame-color-swatch" type="button" data-color="#0000ff" aria-label="파랑" title="파랑"></button>
+              <button class="frame-color-swatch" type="button" data-color="#4b0082" aria-label="남색" title="남색"></button>
+              <button class="frame-color-swatch" type="button" data-color="#800080" aria-label="보라" title="보라"></button>
+              <button class="frame-color-swatch" type="button" data-color="#000000" aria-label="검정" title="검정"></button>
+              <button class="frame-color-swatch" type="button" data-color="#ffffff" aria-label="흰색" title="흰색"></button>
+            </div>
+          </div>
+          <div id="panel-sticker" class="editor-panel hidden" role="tabpanel" aria-labelledby="tab-sticker">
+            <p class="editor-help">스티커를 누른 뒤 사진 위에서 움직여 보세요.</p>
+            <div id="sticker-options" class="sticker-options" aria-label="스티커 목록"></div>
+          </div>
+          <div id="panel-drawing" class="editor-panel hidden" role="tabpanel" aria-labelledby="tab-drawing">
+            <div class="drawing-options">
+              <div class="drawing-tool-row">
+                <button id="eraser-mode" class="tool-choice" type="button" aria-pressed="false">지우개</button>
+                <button id="brush-mode" class="tool-choice active" type="button" aria-pressed="true">브러쉬</button>
+                <button id="brush-color-toggle" class="brush-color-toggle" type="button" aria-expanded="false" aria-controls="brush-palette" aria-label="브러쉬 색상 팔레트 열기">
+                  <span id="brush-color-preview" class="brush-color-preview" aria-hidden="true"></span>
+                  <span>색상</span>
+                </button>
+                <span id="brush-size-label" class="brush-size-label">크기 8</span>
+              </div>
+              <div id="brush-palette" class="brush-palette hidden" role="group" aria-label="브러쉬 색상 팔레트">
+                <button class="brush-swatch" type="button" data-color="#ff0000" aria-label="빨강" title="빨강"></button>
+                <button class="brush-swatch" type="button" data-color="#ff8c00" aria-label="주황" title="주황"></button>
+                <button class="brush-swatch" type="button" data-color="#ffd700" aria-label="노랑" title="노랑"></button>
+                <button class="brush-swatch" type="button" data-color="#008000" aria-label="초록" title="초록"></button>
+                <button class="brush-swatch" type="button" data-color="#0000ff" aria-label="파랑" title="파랑"></button>
+                <button class="brush-swatch" type="button" data-color="#4b0082" aria-label="남색" title="남색"></button>
+                <button class="brush-swatch" type="button" data-color="#800080" aria-label="보라" title="보라"></button>
+                <button class="brush-swatch" type="button" data-color="#000000" aria-label="검정" title="검정"></button>
+                <button class="brush-swatch" type="button" data-color="#ffffff" aria-label="흰색" title="흰색"></button>
+                <label class="custom-brush-color" for="brush-color">직접 선택
+                  <input id="brush-color" class="brush-color" type="color" value="#ff0000" aria-label="원하는 브러쉬 색상 직접 선택">
+                </label>
+              </div>
+            </div>
+            <p id="editor-status" class="editor-help" role="status" aria-live="polite">사진을 손가락이나 마우스로 그려 보세요.</p>
+          </div>
+          <div id="editor-workspace" class="editor-workspace">
+            <div id="transform-controls" class="transform-controls" aria-label="선택 항목 크기와 기울기 조절">
+              <button id="size-down" class="transform-button" type="button" aria-label="크기 줄이기">−</button>
+              <button id="size-up" class="transform-button" type="button" aria-label="크기 키우기">＋</button>
+              <button id="rotate-left" class="transform-button" type="button" aria-label="왼쪽으로 기울이기">↶</button>
+              <button id="rotate-right" class="transform-button" type="button" aria-label="오른쪽으로 기울이기">↷</button>
+            </div>
+            <div class="editor-stage">
+              <div id="result-strip" class="result-strip">
+                <canvas
+                  id="result-canvas"
+                  class="result-canvas"
+                  role="img"
+                  aria-label="촬영한 사진을 세로로 배치한 결과 프레임"
+                >촬영 결과를 표시하는 세로 프레임입니다.</canvas>
+                <canvas id="decoration-canvas" class="decoration-canvas" aria-label="스티커와 그리기 편집 영역"></canvas>
+              </div>
+              <button id="sticker-trash" class="sticker-trash" type="button" aria-label="선택한 프레임이나 스티커를 쓰레기통으로 옮겨 삭제">
+                <img src="쓰레기통.png" alt="">
+                <span>프레임이나 스티커를 여기로 끌어 삭제</span>
+              </button>
+            </div>
+          </div>
+          <div class="editor-actions">
+            <button id="reset-current-tool" class="secondary-button" type="button">현재 기능만 초기화</button>
+            <button id="clear-decorations" class="secondary-button" type="button">전체 꾸미기 초기화</button>
           </div>
         </div>
 
@@ -145,6 +235,7 @@
     <script id="camera-script" src="js/camera.js"></script>
     <script id="frame-script" src="js/frame.js"></script>
     <script id="filters-script" src="js/filters.js"></script>
+    <script id="decorate-script" src="js/decorate.js"></script>
     <script id="upload-script" src="js/upload.js"></script>
     <script id="app-script" src="js/app.js"></script>
   </body>
